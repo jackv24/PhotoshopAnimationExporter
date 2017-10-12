@@ -83,7 +83,19 @@ for(i = 0; i < doc.layerSets.length; ++i)
         
         layer.visible = false;
     }
-
+    
+    //Save document information as JSON
+    var json = '{\n' +
+                    '\t"name":"' + newDocName + '",\n' + 
+                     '\t"width":' + newDoc.width.value + ',\n' +
+                     '\t"height":' + newDoc.height.value+ ',\n' +
+                     '\t"pivot":{\n\t\t"x":0.5,"y":0\n\t}\n}';
+    
+    var file = new File(subfolder + "/info.json");
+    file.open('w');
+    file.write(json);
+    file.close();
+    
     newDoc.close(SaveOptions.DONOTSAVECHANGES);
 }
 
