@@ -13,6 +13,7 @@ function mkdir(path) {
 
 var parentFolderPath = app.activeDocument.path;
 var docName = app.activeDocument.name;
+docName = docName.substring(0, docName.length-4);
 
 var doc = app.activeDocument.duplicate();
 
@@ -86,10 +87,10 @@ for(i = 0; i < doc.layerSets.length; ++i)
     
     //Save document information as JSON
     var json = '{\n' +
-                    '\t"name":"' + newDocName + '",\n' + 
-                     '\t"width":' + newDoc.width.value + ',\n' +
-                     '\t"height":' + newDoc.height.value+ ',\n' +
+                    '\t"packingTag":"' + docName + '",\n' + 
                      '\t"pivot":{\n\t\t"x":0.5,"y":0\n\t}\n}';
+    
+    //{"packingTag":"","pivot":{"x":0.0,"y":0.0}}
     
     var file = new File(subfolder + "/info.json");
     file.open('w');
