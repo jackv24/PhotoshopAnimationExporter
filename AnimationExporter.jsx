@@ -39,11 +39,14 @@ for(i = 0; i < doc.layerSets.length; ++i)
     var subfolder = new Folder(parentFolderPath + "/" + newDocName + "/");
     subfolder.create();       
     
+    var pivot = {"x":0.5, "y": 0};
+    
     for(j = layerSet.artLayers.length - 1; j >= 0 ; --j)
     {
+         var layer = layerSet.artLayers[j];
+        
          app.activeDocument = doc;        
         
-         var layer = layerSet.artLayers[j];
          var visible = layer.visible;
          layer.visible = true;
          layer.copy();
@@ -55,7 +58,7 @@ for(i = 0; i < doc.layerSets.length; ++i)
          app.activeDocument = newDoc;
          
          var newLayer = newDoc.paste();
-         
+         newLayer.name = layer.name;
          newLayer.translate (offsetX, offsetY);
     }
 
@@ -66,13 +69,30 @@ for(i = 0; i < doc.layerSets.length; ++i)
     }
 
     //Save individual layers to file
+    var num = 0;
     for(j= 0; j < newDoc.artLayers.length; ++j)
     {
         var layer = newDoc.artLayers[j];
         
+        $.write(layer.name);
+        
+        //If this layer s titled pivot, don't use it as a sprite, use it to set pivot position
+         if(layer.name == "pivot")
+        {
+             var posX = ((layer.bounds[0].value + layer.bounds[2].value)/2);
+             var posY = ((layer.bounds[1].value + layer.bounds[3].value)/2);
+             
+             pivot.x = posX / width;
+             pivot.y = 1-(posY / height);
+             
+             continue;
+        }
+        
+        ++num;
+        
         layer.visible = true;
         
-        var documentPath = subfolder + "/" + newDocName + "_" + (j+1) + ".png";
+        var documentPath = subfolder + "/" + newDocName + "_" + num + ".png";
         
         $.write ("(" + documentPath + ")");
         
@@ -88,7 +108,7 @@ for(i = 0; i < doc.layerSets.length; ++i)
     //Save document information as JSON
     var json = '{\n' +
                     '\t"packingTag":"' + docName + '",\n' + 
-                     '\t"pivot":{\n\t\t"x":0.5,"y":0\n\t}\n}';
+                     '\t"pivot":{\n\t\t"x":' + pivot.x + ',"y":' + pivot.y + '\n\t}\n}';
     
     //{"packingTag":"","pivot":{"x":0.0,"y":0.0}}
     
