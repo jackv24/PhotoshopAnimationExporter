@@ -17,4 +17,8 @@ Frames inside a folder:
 
 ![Frames](https://i.imgur.com/1D3Yjb8.png)
 
+Add a layer called "pivot" with a single pixel to set the pivot point - good for importing to Unity!
+
+![Pivot](https://i.imgur.com/m0KZwbT.png)
+
 *animations by James Stagg ([@BlackCatKingdom](https://twitter.com/BlackCatKingdom))*
