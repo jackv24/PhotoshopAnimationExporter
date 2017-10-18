@@ -1,5 +1,6 @@
 ﻿#target photoshop
 
+//Automatically creates all the required folders in the path
 function mkdir(path) {  
   var folder = new Folder(path);  
      
@@ -11,24 +12,31 @@ function mkdir(path) {
   }  
 }  
 
+//Get original document's path and name, to save exported files at that location
 var parentFolderPath = app.activeDocument.path;
 var docName = app.activeDocument.name;
-docName = docName.substring(0, docName.length-4);
+docName = docName.substring(0, docName.length-4); //Exported folder shouldn't have .psd in name
 
+//Duplicate document, to prevent any changes to original document
 var doc = app.activeDocument.duplicate();
 
+//Make sure to measure in pixels
 preferences.rulerUnits = Units.PIXELS;
 
+//Every layer set is it's own animation
 for(i = 0; i < doc.layerSets.length; ++i)
 { 
     var layerSet = doc.layerSets[i];
   
+    //Skip layer set if it is disabled (no need to export animations that aren't desired)
     if(!layerSet.visible)
         continue;
   
+    //Calculate size of new document (should fit all layers from set)
     var height = layerSet.bounds[3].value - layerSet.bounds[1].value;
     var width = layerSet.bounds[2].value - layerSet.bounds[0].value;
     
+    //Get offet of this layer set from centre of original document (used to calculate placement in new document)
     var setOffsetX = (layerSet.bounds[0] + layerSet.bounds[2])/2;
     var setOffsetY = (layerSet.bounds[1] + layerSet.bounds[3])/2;
     
@@ -36,33 +44,46 @@ for(i = 0; i < doc.layerSets.length; ++i)
     
     var newDocName = newDoc.name;    
     
+    //Create folder to store this animation's frames
     var subfolder = new Folder(parentFolderPath + "/" + newDocName + "/");
-    subfolder.create();       
+    subfolder.create();
     
     var pivot = {"x":0.5, "y": 0};
-    
+
     for(j = layerSet.artLayers.length - 1; j >= 0 ; --j)
     {
-         var layer = layerSet.artLayers[j];
+        var layer = layerSet.artLayers[j];
+
+        app.activeDocument = doc;        
         
-         app.activeDocument = doc;        
-        
-         var visible = layer.visible;
-         layer.visible = true;
-         layer.copy();
-         layer.visible = visible;
+        var offsetX = ((layer.bounds[0] + layer.bounds[2])/2)-setOffsetX;
+        var offsetY = ((layer.bounds[1] + layer.bounds[3])/2)-setOffsetY;
          
-         var offsetX = ((layer.bounds[0] + layer.bounds[2])/2)-setOffsetX;
-         var offsetY = ((layer.bounds[1] + layer.bounds[3])/2)-setOffsetY;
+        //If this layer is titled pivot, don't use it as a sprite, use it to set pivot position
+        if(layer.name == "pivot")
+        {
+            pivot.x = (offsetX + width / 2) / width;
+            pivot.y = (offsetY - height / 2) / height;
+             
+            continue;
+        }
+
+        var visible = layer.visible;
+        layer.visible = true;
+        layer.copy();
+        layer.visible = visible;
+
+        app.activeDocument = newDoc;
          
-         app.activeDocument = newDoc;
-         
-         var newLayer = newDoc.paste();
-         newLayer.name = layer.name;
-         newLayer.translate (offsetX, offsetY);
+        var newLayer = newDoc.paste();
+        newLayer.name = layer.name;
+        newLayer.translate (offsetX, offsetY);
     }
 
-    //Disable all layers
+    //Make sure new doc is active (since pivot might skip this)
+    app.activeDocument = newDoc;
+
+    //Disable all layers (only enable the one we are currently saving below)
     for(j= 0; j < newDoc.artLayers.length; ++j)
     {
         newDoc.artLayers[j].visible = false;
@@ -76,19 +97,7 @@ for(i = 0; i < doc.layerSets.length; ++i)
         
         $.write(layer.name);
         
-        //If this layer s titled pivot, don't use it as a sprite, use it to set pivot position
-         if(layer.name == "pivot")
-        {
-             var posX = ((layer.bounds[0].value + layer.bounds[2].value)/2);
-             var posY = ((layer.bounds[1].value + layer.bounds[3].value)/2);
-             
-             pivot.x = posX / width;
-             pivot.y = 1-(posY / height);
-             
-             continue;
-        }
-        
-        ++num;
+        ++num; //Keep track of frame count, for file naming
         
         layer.visible = true;
         
@@ -108,7 +117,7 @@ for(i = 0; i < doc.layerSets.length; ++i)
     //Save document information as JSON
     var json = '{\n' +
                     '\t"packingTag":"' + docName + '",\n' + 
-                     '\t"pivot":{\n\t\t"x":' + pivot.x + ',"y":' + pivot.y + '\n\t}\n}';
+                     '\t"pivot":{\n\t\t"x":' + pivot.x.value + ',"y":' + pivot.y.value + '\n\t}\n}';
     
     //{"packingTag":"","pivot":{"x":0.0,"y":0.0}}
     
