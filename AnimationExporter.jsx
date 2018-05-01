@@ -1,17 +1,5 @@
 ﻿#target photoshop
 
-//Automatically creates all the required folders in the path
-function mkdir(path) {  
-  var folder = new Folder(path);  
-     
-  if (!folder.exists) {  
-    var parts = path.split('/');  
-    parts.pop();  
-    mkdir(parts.join('/'));  
-    folder.create();  
-  }  
-}  
-
 //Get original document's path and name, to save exported files at that location
 var parentFolderPath = app.activeDocument.path;
 var docName = app.activeDocument.name;
@@ -45,10 +33,8 @@ for(i = 0; i < doc.layerSets.length; ++i)
     var newDocName = newDoc.name;    
     
     //Create folder to store this animation's frames
-    var subfolder = new Folder(parentFolderPath + "/" + newDocName + "/");
+    var subfolder = new Folder(parentFolderPath + "/" + docName + "/" + newDocName + "/");
     subfolder.create();
-    
-    var pivot = {"x":0.5, "y": 0};
 
     for(j = layerSet.artLayers.length - 1; j >= 0 ; --j)
     {
@@ -58,15 +44,6 @@ for(i = 0; i < doc.layerSets.length; ++i)
         
         var offsetX = ((layer.bounds[0] + layer.bounds[2])/2)-setOffsetX;
         var offsetY = ((layer.bounds[1] + layer.bounds[3])/2)-setOffsetY;
-         
-        //If this layer is titled pivot, don't use it as a sprite, use it to set pivot position
-        if(layer.name == "pivot")
-        {
-            pivot.x = (offsetX + width / 2) / width;
-            pivot.y = (offsetY - height / 2) / height;
-             
-            continue;
-        }
 
         var visible = layer.visible;
         layer.visible = true;
@@ -113,18 +90,6 @@ for(i = 0; i < doc.layerSets.length; ++i)
         
         layer.visible = false;
     }
-    
-    //Save document information as JSON
-    var json = '{\n' +
-                    '\t"packingTag":"' + docName + '",\n' + 
-                     '\t"pivot":{\n\t\t"x":' + pivot.x.value + ',"y":' + pivot.y.value + '\n\t}\n}';
-    
-    //{"packingTag":"","pivot":{"x":0.0,"y":0.0}}
-    
-    var file = new File(subfolder + "/info.json");
-    file.open('w');
-    file.write(json);
-    file.close();
     
     newDoc.close(SaveOptions.DONOTSAVECHANGES);
 }

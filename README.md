@@ -4,7 +4,7 @@ A photoshop script for exporting animations as layers to their seperate frames. 
 ![Document](https://i.imgur.com/941mnz7.png)
 
 ## How to use
-1. Place the script in your Scripts folder (C:\Program Files\Adobe\Adobe Photoshop CC 2017\Presets\Scripts)
+1. Place the script in your Scripts folder (e.g., C:\Program Files\Adobe\Adobe Photoshop CC 2017\Presets\Scripts)
 2. Open photoshop document
 3. File>Scripts>Animation Exporter
 4. Wait to complete, you will find your frames as PNG files in folders next to where your document is saved
@@ -16,9 +16,5 @@ Exported folders:
 Frames inside a folder:
 
 ![Frames](https://i.imgur.com/1D3Yjb8.png)
-
-Add a layer called "pivot" with a single pixel to set the pivot point - good for importing to Unity!
-
-![Pivot](https://i.imgur.com/m0KZwbT.png)
 
 *animations by James Stagg ([@BlackCatKingdom](https://twitter.com/BlackCatKingdom))*
